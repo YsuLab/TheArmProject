@@ -1,0 +1,16 @@
+{
+  "name": "S3_glass_door",
+  "title": "S3 · Glass door",
+  "description": "The ToF sensor sees straight through glass; the ultrasonic sensor hears it and triggers STOP. Scene as given in PLAN.md section 0.6.",
+  "size_m": [12, 6],
+  "start": {"x": 1, "y": 3, "heading_deg": 0},
+  "goal":  {"x": 11, "y": 3, "label": "exit"},
+  "ambient_c": 25,
+  "obstacles": [
+    {"type": "rect", "x": 6, "y": 2, "w": 0.05, "h": 2, "z_min": 0, "z_max": 2.1, "material": "glass", "label": "glass door"},
+    {"type": "circle", "x": 4, "y": 4.5, "r": 0.3, "z_min": 0, "z_max": 0.45, "material": "furniture", "label": "low stool"},
+    {"type": "rect", "x": 8, "y": 1, "w": 0.4, "h": 0.8, "z_min": 1.5, "z_max": 1.9, "material": "furniture", "label": "open cabinet door"},
+    {"type": "circle", "x": 3, "y": 1, "r": 0.1, "z_min": 0.9, "z_max": 1.1, "material": "steel_polished", "label": "kettle", "temp_c": 90}
+  ],
+  "movers": [{"label": "person", "r": 0.3, "path": [[9, 0.5], [9, 5.5]], "speed": 1.0, "z_max": 1.75}]
+}

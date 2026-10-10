@@ -1,0 +1,16 @@
+{
+  "name": "S6_crossing",
+  "title": "S6 · Person crossing the path",
+  "description": "A person walks across the user's path. STOP must fire within one sensor frame (~67 ms) of the person entering stop range.",
+  "size_m": [12, 6],
+  "start": {"x": 1, "y": 3, "heading_deg": 0},
+  "goal": {"x": 11, "y": 3, "label": "far wall"},
+  "ambient_c": 25,
+  "obstacles": [
+    {"type": "rect", "x": 7.0, "y": 0, "w": 1.0, "h": 0.6, "z_min": 0, "z_max": 1.1, "material": "furniture", "label": "bench"}
+  ],
+  "movers": [
+    {"label": "person", "r": 0.3, "path": [[4, 0.4], [4, 5.6]], "speed": 1.0, "z_max": 1.75},
+    {"label": "person", "r": 0.3, "path": [[9, 5.6], [9, 0.4]], "speed": 0.8, "z_max": 1.75}
+  ]
+}

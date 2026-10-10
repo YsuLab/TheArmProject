@@ -1,0 +1,14 @@
+{
+  "name": "S1_hallway",
+  "title": "S1 · Hallway with a door at the end",
+  "description": "Basic forward guidance and goal visibility. Walk straight: the path is clear, so expect no STOP and an occasional forward tick from the model.",
+  "size_m": [20, 2.4],
+  "start": {"x": 1, "y": 1.2, "heading_deg": 0},
+  "goal": {"x": 19.4, "y": 1.2, "label": "door"},
+  "ambient_c": 25,
+  "obstacles": [
+    {"type": "rect", "x": 19.85, "y": 0.6, "w": 0.15, "h": 1.2, "z_min": 0, "z_max": 2.1, "material": "door", "label": "door"},
+    {"type": "rect", "x": 7, "y": 0, "w": 0.6, "h": 0.25, "z_min": 0, "z_max": 1.2, "material": "furniture", "label": "radiator cabinet"},
+    {"type": "rect", "x": 13, "y": 2.1, "w": 0.4, "h": 0.3, "z_min": 0, "z_max": 0.9, "material": "plastic", "label": "bin"}
+  ]
+}

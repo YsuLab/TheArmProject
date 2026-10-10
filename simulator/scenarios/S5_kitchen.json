@@ -1,0 +1,16 @@
+{
+  "name": "S5_kitchen",
+  "title": "S5 · Kitchen counter",
+  "description": "Move the HAND with the mouse. Polished-steel kettle 90 °C, ceramic mug 70 °C, cold glass bottle 4 °C. The shiny kettle reads far cooler than it is and does not trigger HOT — the known limitation.",
+  "size_m": [6, 4],
+  "start": {"x": 3, "y": 2.0, "heading_deg": -90},
+  "goal": {"x": 3, "y": 1.3, "label": "counter"},
+  "ambient_c": 25,
+  "hand_mode": true,
+  "obstacles": [
+    {"type": "rect", "x": 0.5, "y": 0.2, "w": 5.0, "h": 0.8, "z_min": 0, "z_max": 0.9, "material": "furniture", "label": "counter"},
+    {"type": "circle", "x": 2.0, "y": 0.75, "r": 0.1, "z_min": 0.9, "z_max": 1.15, "material": "steel_polished", "label": "kettle", "temp_c": 90},
+    {"type": "circle", "x": 3.0, "y": 0.75, "r": 0.045, "z_min": 0.9, "z_max": 1.0, "material": "ceramic", "label": "mug", "temp_c": 70},
+    {"type": "circle", "x": 4.0, "y": 0.75, "r": 0.04, "z_min": 0.9, "z_max": 1.2, "material": "glass", "label": "cold bottle", "temp_c": 4}
+  ]
+}

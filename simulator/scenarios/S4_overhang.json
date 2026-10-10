@@ -1,0 +1,14 @@
+{
+  "name": "S4_overhang",
+  "title": "S4 · Head-height overhang",
+  "description": "An open wall-cabinet door and a low branch at head height: a cane sweeps under them, the shoulder sensor's upper rows catch them.",
+  "size_m": [10, 4],
+  "start": {"x": 1, "y": 2, "heading_deg": 0},
+  "goal": {"x": 9.3, "y": 2, "label": "end of the corridor"},
+  "ambient_c": 25,
+  "obstacles": [
+    {"type": "rect", "x": 4.6, "y": 0, "w": 0.8, "h": 1.2, "z_min": 1.5, "z_max": 2.2, "material": "furniture", "label": "wall cabinet"},
+    {"type": "rect", "x": 5.0, "y": 1.2, "w": 0.4, "h": 1.0, "z_min": 1.5, "z_max": 1.9, "material": "furniture", "label": "open cabinet door"},
+    {"type": "rect", "x": 7.6, "y": 2.3, "w": 0.1, "h": 1.7, "z_min": 1.55, "z_max": 1.8, "material": "furniture", "label": "low branch"}
+  ]
+}
