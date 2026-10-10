@@ -238,7 +238,7 @@ export function tofGrid(
   cfg: SensorConfig,
   maxRange: number,
   rng: Rng | null,
-  onHit?: (row: number, col: number, o: Obstacle) => void,
+  onHit?: (row: number, col: number, o: Obstacle, d: number) => void,
 ): Grid {
   const { az, el } = zoneAngles(cfg);
   const grid: Grid = [];
@@ -251,7 +251,7 @@ export function tofGrid(
         maxRange: Infinity,
       });
       let d = r.d;
-      if (onHit && r.hit && r.hit !== "floor" && d <= maxRange) onHit(i, j, r.hit);
+      if (onHit && r.hit && r.hit !== "floor" && d <= maxRange) onHit(i, j, r.hit, d);
       if (rng && cfg.noiseFrac > 0 && Number.isFinite(d)) d = d * (1 + rng.gauss() * cfg.noiseFrac);
       row.push(d > maxRange ? Infinity : d);
     }

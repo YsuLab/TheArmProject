@@ -43,6 +43,12 @@ export interface SimConfig {
   tofHz: number;
   decideEveryMs: number;
   ttlMs: number;
+  /**
+   * Arbitration sees the worst (smallest) clearance per side over this window instead of the
+   * current frame only. 0 = PLAN.md / pipeline.py behaviour. Proposed fix for frame-to-frame
+   * flicker letting a wrong left/right through (see README findings).
+   */
+  clearanceHoldMs: number;
   model: ModelConfig;
   walkSpeed: number;
   turnRateDeg: number;
@@ -60,6 +66,7 @@ export const DEFAULT_CONFIG: SimConfig = {
   tofHz: 15,
   decideEveryMs: 500,
   ttlMs: 1500,
+  clearanceHoldMs: 0,
   model: { kind: "stub", latencyMs: 150, jitterMs: 50, errorRate: 0, url: "http://localhost:8000", modelName: "mock" },
   walkSpeed: 1.4,
   turnRateDeg: 90,
@@ -123,8 +130,9 @@ export class Metrics {
   missedStops = 0;
   collisions = 0;
   /**
-   * Collision while a model cue was active AND the obstacle was in the safety sensors' current
-   * view (last ~2 frames) — i.e. arbitration had the information and still let the cue through.
+   * Collision while a model cue was active AND, in the last ~2 frames, the safety layer had that
+   * obstacle in the range where it acts (ToF rows in use < warn_m, or ultrasonic < stop_m) —
+   * i.e. arbitration had the information and still let the model's cue through.
    */
   modelCollisions = 0;
   /**
@@ -190,8 +198,9 @@ export class Sim {
   private stopSince: number | null = null;
   private lastSweepRight = true;
   private lastExpected: Direction | null = null;
-  /** Obstacle index (in obstaclesAt order) -> last time the safety sensors registered it. */
+  /** Obstacle index (in obstaclesAt order) -> last time the safety layer had it in acting range. */
   private seenBySafety = new Map<number, number>();
+  private clearanceHistory: { t: number; c: Clearance }[] = [];
 
   constructor(scenario: Scenario, cfg: Partial<SimConfig> = {}) {
     this.scenario = scenario;
@@ -295,7 +304,8 @@ export class Sim {
     while (this.nextUs <= this.t) {
       const u = ultrasonic(obstacles, this.pose, this.cfg.sensor.mountH, this.cfg.sensor.tiltDeg, this.rng);
       this.us = u.d;
-      if (u.hit) this.seenBySafety.set(obstacles.indexOf(u.hit), this.t);
+      // the ultrasonic only acts below stop_m (PLAN 0.6); further readings never reach arbitration
+      if (u.hit && u.d !== null && u.d < this.cfg.stopM) this.seenBySafety.set(obstacles.indexOf(u.hit), this.t);
       this.nextUs += 1 / ULTRASONIC.hz;
     }
     if (this.nextTof <= this.t) {
@@ -380,8 +390,8 @@ export class Sim {
     const cfg = this.cfg;
     const w0 = performance.now();
     const usedRows = cfg.sensor.zones - cfg.ignoreBottomRows;
-    const grid = tofGrid(obstacles, this.pose, cfg.sensor, this.maxRange, this.rng, (row, _col, o) => {
-      if (row < usedRows) this.seenBySafety.set(obstacles.indexOf(o), this.t);
+    const grid = tofGrid(obstacles, this.pose, cfg.sensor, this.maxRange, this.rng, (row, _col, o, d) => {
+      if (row < usedRows && d < cfg.warnM) this.seenBySafety.set(obstacles.indexOf(o), this.t);
     });
     const w1 = performance.now();
     const tofOut = safetyLayer(grid, cfg.stopM, cfg.warnM, cfg.ignoreBottomRows);
@@ -400,8 +410,9 @@ export class Sim {
     // decision: freshness by the time the state was captured (TTL), then arbitration
     const ageMs = this.latest ? (this.t - this.latest.requestT) * 1000 : null;
     const fresh = this.latest && ageMs! <= cfg.ttlMs ? this.latest.answer.choice : null;
-    const final = arbitrate(safety, fresh, clearance, cfg.stopM);
-    const why = explainArbitration(safety, fresh, !!this.latest && ageMs! > cfg.ttlMs, clearance, cfg.stopM);
+    const held = this.heldClearance(clearance);
+    const final = arbitrate(safety, fresh, held, cfg.stopM);
+    const why = explainArbitration(safety, fresh, !!this.latest && ageMs! > cfg.ttlMs, held, cfg.stopM);
     if (cfg.bleLink) this.glove.receive(final.pattern as HubPattern, final.intensity, this.tMs);
     this.gloveOut = this.glove.update(this.tMs, this.heat.ir_reported_c, this.heat.palm_dist_cm);
     const w4 = performance.now();
@@ -441,6 +452,17 @@ export class Sim {
     this.record(frame);
     this.frame = frame;
     this.requestDecision(state);
+  }
+
+  private heldClearance(c: Clearance): Clearance {
+    const hold = this.cfg.clearanceHoldMs / 1000;
+    const hist = this.clearanceHistory;
+    hist.push({ t: this.t, c });
+    while (hist.length && this.t - hist[0].t > hold + 1e-9) hist.shift();
+    if (hold <= 0) return c;
+    const out = { ...c };
+    for (const h of hist) for (const k of ["left", "ahead", "right"] as const) out[k] = Math.min(out[k], h.c[k]);
+    return out;
   }
 
   private record(f: Frame) {

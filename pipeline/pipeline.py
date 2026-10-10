@@ -334,6 +334,26 @@ def draw_overlay(frame, grid, haptic: Haptic, decision, dec_ms):
 
 # ----------------------------------------------------------------------------- main
 
+def open_video_writer(out_dir: str, fps: float, w: int, h: int):
+    """annotated.mp4 (H.264) if this OpenCV build can encode it, else annotated.webm (VP8).
+
+    Both play in browsers, so the simulator's Mode A can replay them; OpenCV's 'mp4v'
+    (MPEG-4 Part 2) does not, and is only the last resort.
+    """
+    import cv2
+    for fourcc, name in (("avc1", "annotated.mp4"), ("VP80", "annotated.webm"), ("mp4v", "annotated.mp4")):
+        path = os.path.join(out_dir, name)
+        writer = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
+        if writer.isOpened():
+            if fourcc == "mp4v":
+                print("[warn] writing mp4v video; browsers (simulator Mode A) cannot play it")
+            return writer
+        writer.release()
+        if os.path.exists(path):
+            os.remove(path)
+    raise RuntimeError("no usable video codec in this OpenCV build; use --no-video-out")
+
+
 def pct(xs, p):
     return float(np.percentile(xs, p)) if xs else float("nan")
 
@@ -453,9 +473,7 @@ def main():
             if not args.no_video_out:
                 vis = draw_overlay(frame, grid, final, fresh, last_dec_ms)
                 if writer is None:
-                    h, w = vis.shape[:2]
-                    writer = cv2.VideoWriter(os.path.join(args.out, "annotated.mp4"),
-                                             cv2.VideoWriter_fourcc(*"mp4v"), args.fps, (w, h))
+                    writer = open_video_writer(args.out, args.fps, vis.shape[1], vis.shape[0])
                 writer.write(vis)
 
     cap.release()

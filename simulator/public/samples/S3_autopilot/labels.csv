@@ -1,0 +1,8 @@
+start_s,end_s,expected
+0.008,2.542,forward
+2.608,3.275,right
+3.342,4.800,stop
+4.867,6.267,right
+6.333,7.333,stop
+7.400,8.600,left
+8.667,19.942,forward

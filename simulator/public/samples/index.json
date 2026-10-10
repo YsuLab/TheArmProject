@@ -1,0 +1,28 @@
+[
+  {
+    "id": "pipeline_testpattern",
+    "title": "pipeline.py plumbing run (test-pattern depth, mock server)",
+    "files": [
+      "events.jsonl",
+      "annotated.webm",
+      "report.json",
+      "labels.csv"
+    ]
+  },
+  {
+    "id": "S3_autopilot",
+    "title": "S3 glass door (autopilot, Mode B recorder)",
+    "files": [
+      "events.jsonl",
+      "labels.csv"
+    ]
+  },
+  {
+    "id": "S2_wrong_model",
+    "title": "S2 office, model always wrong (autopilot)",
+    "files": [
+      "events.jsonl",
+      "labels.csv"
+    ]
+  }
+]
